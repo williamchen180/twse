@@ -4,6 +4,7 @@
 
 from mechanize import Browser
 from BeautifulSoup import BeautifulSoup
+import cPickle
 
 
 def stockNumber():
@@ -78,8 +79,13 @@ if __name__ == '__main__':
 	for x in Stock:
 		print '\n'
 		print x[0], x[1]
+		numbers = []
 		for y in Stock[x]:
 			print "    ", y[0], y[1],
+			numbers.append(y[0])
+
+		with open( x[0] + x[1] + '.cpickle', 'w') as f:
+			cPickle.dump( numbers, f )
 			
 
 

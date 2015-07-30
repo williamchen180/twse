@@ -5,6 +5,7 @@
 # 資料庫中查無需求資料
 
 import sys
+import time
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -15,14 +16,19 @@ from BeautifulSoup import BeautifulSoup
 from selenium.webdriver.common.by import By
 import cPickle
 import stockNumber
+import datetime
 
 import pprint
 import os
 
+def Now():
+	return datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
 class twse():
-	def __init__(self):
+	def __init__(self, stockList = None):
 		self.year = None
 		self.stock = None
+		self.stockList = stockList
 
 	def dump_news(self):
 		html = self.br.page_source
@@ -112,6 +118,7 @@ class twse():
 	def prepare(self):
 		self.br = webdriver.Firefox()
 		#self.br = webdriver.Chrome('/Users/WilliamChen/Downloads/chromedriver')
+
 		self.br.get( 'http://mops.twse.com.tw/mops/web/t05st01')
 
 	def set_year(self, year):
@@ -157,7 +164,7 @@ class twse():
 			year_news.append( news )
 			self.back()
 
-			print '%d done' % i
+			print '%d done' % i, Now()
 
 		return year_news
 
@@ -165,7 +172,10 @@ class twse():
 	def run(self):
 
 		self.prepare()
-		numbers = self.get_stock_numbers()
+		if self.stockList != None:
+			numbers = self.stockList
+		else:
+			numbers = self.get_stock_numbers()
 
 		try:
 			for number in numbers:
@@ -183,17 +193,26 @@ class twse():
 						cPickle.dump( ret, f )	
 			return True
 		except Exception as e:
+			self.br.close()
+			print e
 			return e
-				
-
-
-
-
 
 if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		print "usage: %s stock" % sys.argv[0]
+		sys.exit(0)
+
+	stockList=[]
+	for x in sys.argv[1:]:
+		with open( x, 'r' ) as f:
+			l = cPickle.load( f )
+		stockList += l
+
+	print stockList
+
 
 	while True:
-		t = twse()
+		t = twse(stockList)
 		ret = t.run()
 		if ret == True:
 			break
