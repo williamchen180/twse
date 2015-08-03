@@ -34,8 +34,14 @@ class twse():
 		html = self.br.page_source
 		soup = BeautifulSoup( html )
 		tables = soup.findAll('table')
+		for t in tables:
+			if t.getText()[0:2] == u'序號':
+				break
+		if t == tables[-1]:
+			print 'Unable to find 序號'
+			return None
 		try:
-			td = tables[13].findAll('td')
+			td = t.findAll('td')
 			news = {}
 			news[ td[0].getText() ] = td[1].getText()
 			news[ td[2].getText() ] = td[3].getText()
